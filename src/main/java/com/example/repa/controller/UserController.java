@@ -1,6 +1,8 @@
 package com.example.repa.controller;
 
 import com.example.repa.dto.UserDTO;
+import com.example.repa.exception.AlreadyCreatedEntityException;
+import com.example.repa.exception.EntityNotFoundException;
 import com.example.repa.mapper.UserMapper;
 import com.example.repa.model.User;
 import com.example.repa.service.UserService;
@@ -20,7 +22,11 @@ public class UserController {
     @GetMapping("/id={id}")
     public UserDTO getUserById(@PathVariable("id") long id){
         log.info("User " + id);
-        return UserMapper.INSTANCE.userToUserDTO(userService.getUserById(id));
+        User user = userService.getUserById(id);
+        if (user == null){
+            throw new EntityNotFoundException("user was not found");
+        }
+        return UserMapper.INSTANCE.userToUserDTO(user);
     }
 
     @GetMapping()
@@ -32,6 +38,10 @@ public class UserController {
     @PostMapping()
     public UserDTO createUser(@RequestBody UserDTO userDTO){
         log.info("User creating : " + userDTO);
+        User user = userService.getUserById(userDTO.getId());
+        if(user != null){
+            throw new AlreadyCreatedEntityException("User has already exists");
+        }
         return UserMapper.INSTANCE.userToUserDTO(userService.createUser(UserMapper.INSTANCE.userDTOtoUser(userDTO)));
     }
 
@@ -45,6 +55,9 @@ public class UserController {
     public UserDTO deleteUser(@PathVariable("id") long id){
         log.info("User " + id + " deleting");
         User user = userService.getUserById(id);
+        if(user == null){
+            throw new EntityNotFoundException("User has not exists already");
+        }
         userService.deleteUser(user);
         log.info("User " + user.getId() + " with name " + user.getName() + " was deleted");
         return UserMapper.INSTANCE.userToUserDTO(user);

@@ -1,10 +1,11 @@
 package com.example.repa.model;
 
-import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
+
+import javax.persistence.*;
 
 @Getter
 @Setter

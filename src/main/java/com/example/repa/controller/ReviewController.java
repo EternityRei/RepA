@@ -1,6 +1,7 @@
 package com.example.repa.controller;
 
 import com.example.repa.dto.ReviewDTO;
+import com.example.repa.exception.EntityNotFoundException;
 import com.example.repa.mapper.ReviewMapper;
 import com.example.repa.model.Review;
 import com.example.repa.service.ReviewService;
@@ -18,13 +19,21 @@ public class ReviewController {
     @GetMapping("/id={id}")
     public ReviewDTO getReviewById(@PathVariable("id") long id){
         log.info("Getting review by id : " + id);
-        return ReviewMapper.INSTANCE.reviewToReviewDTO(reviewService.getReviewById(id));
+        Review review = reviewService.getReviewById(id);
+        if(review == null){
+            throw new EntityNotFoundException("Review by id was not found");
+        }
+        return ReviewMapper.INSTANCE.reviewToReviewDTO(review);
     }
 
     @GetMapping("/user_id={userId}?order_id={orderId}")
     public ReviewDTO getReviewByUserIdAndOrderId(@PathVariable("userId") long userId, @PathVariable("orderId") long orderId){
         log.info("Getting review by user id : " + userId + " : and order id  : " + orderId );
-        return ReviewMapper.INSTANCE.reviewToReviewDTO(reviewService.getReviewByUserIdAndOrderId(userId, orderId));
+        Review review = reviewService.getReviewByUserIdAndOrderId(userId, orderId);
+        if(review == null){
+            throw new EntityNotFoundException("Review by userId and orderId was not found");
+        }
+        return ReviewMapper.INSTANCE.reviewToReviewDTO(review);
     }
 
     @PostMapping()
@@ -43,6 +52,9 @@ public class ReviewController {
     public ReviewDTO deleteReview(@PathVariable("id") long id){
         log.info("Deleting review : " + id);
         Review review = reviewService.getReviewById(id);
+        if(review == null){
+            throw new EntityNotFoundException("Review has not exists already");
+        }
         reviewService.deleteReview(review);
         log.info("Review " + id + " for order " + review.getOrderId() + " was deleted");
         return ReviewMapper.INSTANCE.reviewToReviewDTO(review);
